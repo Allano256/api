@@ -47,9 +47,41 @@ async function postForm(e){
         throw new Error(data.error);
     }
 */
+
+//10.
+function processOptions(form){
+    //This will,1.Iterate through the options
+    //Push each value into a temporary array
+    //Convert the array back to a string
+
+    let optArray = [];
+
+    for(let entry of form.entries()){
+        if (entry[0] === 'options'){
+            optArray.push(entry[1]);
+        }
+    }
+    form.delete("options");
+
+    form.append("optioins", optArray.join());//We use the join method to convert it back to a string
+
+    return form;
+
+    //Here we get a comma separated list that our API needs
+    //The data is meant to be sent in a comma based
+
+}
+
+
+
 async function postForm(e) {
 
-    const form = new FormData(document.getElementById("checksform"));
+    const form = processOptions (new FormData(document.getElementById("checksform")));
+    
+    //9. 
+    /*for(let entry of form.entries()){
+        console.log(entry);
+    }*/ //We delete this after stage 10
 
     const response = await fetch(API_URL, {
         method: "POST",
@@ -64,6 +96,7 @@ async function postForm(e) {
     if (response.ok) {
         dissplayErrors(data);
     } else {
+        displayException(data);
         throw new Error(data.error);
     }
 
@@ -110,6 +143,7 @@ function dissplayErrors(data){
     if (response.ok){
         displayStatus(data.expiry);//Display data in modal
     } else {
+        displayException(data);
         throw new Error(data.error);//This is a built in error handler "throw new Error"
     }
 }
@@ -125,4 +159,24 @@ function dissplayErrors(data){
   
 
     resultsModal.show()//To display the modal
+}
+
+//11. We need to provide an exception before we throw an error so it appears in the modal and browser aswell.
+//This needs to display the 1.Status code, 2.error number , 3.and emphasize the missing item.
+
+function displayException(data){
+
+   let heading = `An exception occured`;
+
+   //Build the modal body
+   results = `<div>The API returned status code ${data.status_code}</div>`;
+   results += `<div>Error number: <strong>${data.error_no}</strong></div>`;
+   results += `<div>Error text: <strong>${data.error}</strong></div>`;
+
+   //Here we set the content on the DOM.
+   
+  document.getElementById("resultsModalTitle").innerText = heading;
+  document.getElementById("results-content").innerText = results;
+
+  resultsModal.show();
 }
